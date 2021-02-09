@@ -4,7 +4,7 @@
 // @match       https://kaf.canvas.umn.edu/*
 // @match       https://mediaspace.umn.edu/media/*
 // @grant       none
-// @version     0.0.1
+// @version     0.0.2
 // @author      tny
 // ==/UserScript==
 
@@ -32,8 +32,6 @@ const STYLES = `
 
 window.kWidget.addReadyCallback((id) => {
 	let kp = document.getElementById(id);
-	console.log(kp);
-	console.log(Object.getOwnPropertyNames(kp));
 	kp.kBind("mediaReady", () => ready(kp));
 });
 
@@ -45,8 +43,6 @@ function ready(outerPlayer) {
 	ifp.head.appendChild(styles);
 
 	let kp = ifp.querySelector("#kplayer");
-	console.log(Object.getOwnPropertyNames(kp));
-	console.log(ifp.querySelector("#kplayer").getSources());
 	let srcs = ifp.querySelector("#kplayer").getSources().filter(x => x.mimeType === "video/mp4").map(x => ({
 		id: x.assetid,
 		size: parseInt(x.sizebytes),
@@ -70,7 +66,6 @@ function ready(outerPlayer) {
 		if(!m || m.length < 3) continue;
 		let [, pid, eid] = m;
 
-		console.log(m);
 		link.href = `https://cfvod.kaltura.com/pd/p/${pid}/sp/${pid}00/serveFlavor/entryId/${eid}/v/1/ev/4/flavorId/${fid}/fileName/${fid}_${res}.mp4`;
 		link.innerText = `${res} (${(size / 1024 / 1024).toFixed(2)}M)`;
 
