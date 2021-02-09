@@ -4,7 +4,7 @@
 // @match       https://kaf.canvas.umn.edu/*
 // @match       https://mediaspace.umn.edu/media/*
 // @grant       none
-// @version     0.0.2
+// @version     0.0.3
 // @author      tny
 // ==/UserScript==
 
@@ -35,8 +35,8 @@ window.kWidget.addReadyCallback((id) => {
 	kp.kBind("mediaReady", () => ready(kp));
 });
 
-function ready(outerPlayer) {
-	let ifp = outerPlayer.querySelector("iframe#kplayer_ifp").contentDocument;
+function modPlayer(ifp) {
+	if(ifp.getElementById("ktdl-menu")) return;
 
 	let styles = ifp.createElement("style");
 	styles.innerText = STYLES;
@@ -52,7 +52,7 @@ function ready(outerPlayer) {
 
 	let ctr = ifp.createElement("div");
 	ctr.id = "ktdl-menu";
-	
+
 	let desc = ifp.createElement("span");
 	desc.innerText = "download";
 	ctr.appendChild(desc);
@@ -61,7 +61,7 @@ function ready(outerPlayer) {
 	for(const {id: fid, size, src, res} of srcs) {
 		let opt = ifp.createElement("li");
 		let link = ifp.createElement("a");
-		
+
 		let m = src.match('/p/([0-9]+).*/entryId/([^/]+)');
 		if(!m || m.length < 3) continue;
 		let [, pid, eid] = m;
@@ -75,4 +75,9 @@ function ready(outerPlayer) {
 	ctr.appendChild(opts);
 
 	ifp.querySelector(".videoHolder").appendChild(ctr);
+}
+
+function ready(outerPlayer) {
+	let ifps = Array.from(outerPlayer.querySelectorAll("iframe#kplayer_ifp"));
+	for(let ifp of ifps) modPlayer(ifp.contentDocument);
 }
