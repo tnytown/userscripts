@@ -4,7 +4,7 @@
 // @match       https://kaf.canvas.umn.edu/*
 // @match       https://mediaspace.umn.edu/media/*
 // @grant       none
-// @version     0.0.3
+// @version     0.0.4
 // @author      tny
 // ==/UserScript==
 
