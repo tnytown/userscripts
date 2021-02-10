@@ -66,7 +66,7 @@ function modPlayer(ifp) {
 		if(!m || m.length < 3) continue;
 		let [, pid, eid] = m;
 
-		link.href = `https://cfvod.kaltura.com/pd/p/${pid}/sp/${pid}00/serveFlavor/entryId/${eid}/v/1/ev/4/flavorId/${fid}/fileName/${fid}_${res}.mp4`;
+		link.href = `https://cfvod.kaltura.com/pd/p/${pid}/sp/${pid}00/serveFlavor/entryId/${eid}/flavorId/${fid}/fileName/${fid}_${res}.mp4`;
 		link.innerText = `${res} (${(size / 1024 / 1024).toFixed(2)}M)`;
 
 		opt.appendChild(link);
