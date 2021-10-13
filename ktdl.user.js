@@ -3,8 +3,8 @@
 // @namespace   tny
 // @match       https://kaf.canvas.umn.edu/*
 // @match       https://mediaspace.umn.edu/media/*
-// @grant       none
-// @version     0.0.4
+// @grant       GM.getValue
+// @version     0.0.5
 // @author      tny
 // ==/UserScript==
 
@@ -30,12 +30,12 @@ const STYLES = `
 }
 `;
 
-window.kWidget.addReadyCallback((id) => {
+unsafeWindow.kWidget.addReadyCallback((id) => {
   let kp = document.getElementById(id);
-  kp.kBind("mediaReady", () => ready(kp));
+  kp.kBind("mediaReady", () => ready(kp).catch((e) => console.error(e)));
 });
 
-function modPlayer(ifp) {
+async function modPlayer(ifp) {
   if (ifp.getElementById("ktdl-menu")) return;
 
   let styles = ifp.createElement("style");
@@ -70,7 +70,8 @@ function modPlayer(ifp) {
     if (!m || m.length < 3) continue;
     let [, pid, eid] = m;
 
-    link.href = `https://cfvod.kaltura.com/pd/p/${pid}/sp/${pid}00/serveFlavor/entryId/${eid}/flavorId/${fid}/fileName/${fid}_${res}.mp4`;
+    let scheme = await GM.getValue("scheme", "");
+    link.href = `${scheme}https://cfvod.kaltura.com/pd/p/${pid}/sp/${pid}00/serveFlavor/entryId/${eid}/flavorId/${fid}/fileName/${fid}_${res}.mp4`;
     link.innerText = `${res} (${(size / 1024 / 1024).toFixed(2)}M)`;
 
     opt.appendChild(link);
@@ -81,7 +82,7 @@ function modPlayer(ifp) {
   ifp.querySelector(".videoHolder").appendChild(ctr);
 }
 
-function ready(outerPlayer) {
+async function ready(outerPlayer) {
   let ifps = Array.from(outerPlayer.querySelectorAll("iframe#kplayer_ifp"));
-  for (let ifp of ifps) modPlayer(ifp.contentDocument);
+  for (let ifp of ifps) await modPlayer(ifp.contentDocument);
 }
