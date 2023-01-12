@@ -3,32 +3,20 @@
 // @namespace   tny
 // @match       https://kaf.canvas.umn.edu/*
 // @match       https://mediaspace.umn.edu/media/*
+// @match       https://media.pdx.edu/*
 // @grant       GM.getValue
-// @version     0.0.5
+// @version     0.0.6
 // @author      tny
 // ==/UserScript==
 
-const STYLES = `
-#ktdl-menu {
-  background-color: #ffc107;
-  position: fixed;
-  padding: 0.25em;
-  border-radius: 0 0 0.5em 0;
-}
-
-
-#ktdl-menu > ul {
-  display: none;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-
-#ktdl-menu:hover > ul {
-  display: block;
-}
-`;
+// Polyfill for unsafeWindow
+window.unsafeWindow || (
+	unsafeWindow = (function() {
+		var el = document.createElement('p');
+		el.setAttribute('onclick', 'return window;');
+		return el.onclick();
+	}())
+);
 
 unsafeWindow.kWidget.addReadyCallback((id) => {
   let kp = document.getElementById(id);
@@ -37,10 +25,6 @@ unsafeWindow.kWidget.addReadyCallback((id) => {
 
 async function modPlayer(ifp) {
   if (ifp.getElementById("ktdl-menu")) return;
-
-  let styles = ifp.createElement("style");
-  styles.innerText = STYLES;
-  ifp.head.appendChild(styles);
 
   let kp = ifp.querySelector("#kplayer");
   let srcs = ifp
@@ -56,15 +40,35 @@ async function modPlayer(ifp) {
 
   let ctr = ifp.createElement("div");
   ctr.id = "ktdl-menu";
+  ctr.classList.add("dropup", "comp", "pull-right", "display-high");
 
-  let desc = ifp.createElement("span");
-  desc.innerText = "download";
+  let desc = ifp.createElement("button");
+  desc.classList.add("btn");
+  desc.setAttribute("title", "Download Video");
+  desc.setAttribute("aria-label", "Download Video");
+  desc.setAttribute("aria-haspopup", "true");
+  desc.setAttribute("data-show-tooltip", "true");
+  desc.setAttribute("tabindex", "2");
+  desc.innerHTML = `<i class="icon-download"></i>`;
   ctr.appendChild(desc);
 
   let opts = ifp.createElement("ul");
+  opts.classList.add("dropdown-menu");
+  opts.setAttribute("aria-expanded", "false");
+  opts.setAttribute("role", "menu");
+  opts.setAttribute("aria-labelledby", "Download Video");
+
+  // Toggle menu on click
+  desc.addEventListener("click", () => {
+    opts.classList.toggle("open");
+  });
+
   for (const { id: fid, size, src, res } of srcs) {
     let opt = ifp.createElement("li");
     let link = ifp.createElement("a");
+    link.setAttribute("role", "menuitemcheckbox");
+    link.setAttribute("aria-checked", "false");
+    link.setAttribute("tabindex", "2.01");
 
     let m = src.match("/p/([0-9]+).*/entryId/([^/]+)");
     if (!m || m.length < 3) continue;
@@ -79,7 +83,7 @@ async function modPlayer(ifp) {
   }
   ctr.appendChild(opts);
 
-  ifp.querySelector(".videoHolder").appendChild(ctr);
+  ifp.querySelector(".controlsContainer").appendChild(ctr);
 }
 
 async function ready(outerPlayer) {
